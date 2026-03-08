@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Happy Birthday My Cutooo</title>
+
+<style>
+    :root {
+        --pink: #ff4b6e;
+        --cake-color: #fff0f3;
+        --frosting: #ff8fa3;
+    }
+
+    body {
+        margin: 0;
+        background: #050514;
+        color: White;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+        text-align: center;
+        overflow: hidden;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        perspective: 1200px;
+    }
+
+    /* 3D CAKE WORLD - FIXED CENTER */
+    .cake-world {
+        position: fixed;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 100;
+    }
+
+    .cake-3d {
+        position: relative;
+        width: 160px;
+        height: 120px;
+        transform-style: preserve-3d;
+        transform: rotateX(-15deg) rotateY(30deg);
+        animation: rotateCake 8s infinite linear;
+        cursor: pointer;
+    }
+
+    @keyframes rotateCake {
+        from { transform: rotateX(-15deg) rotateY(0deg); }
+        to { transform: rotateX(-15deg) rotateY(360deg); }
+    }
+
+    /* Cake Construction */
+    .side {
+        position: absolute;
+        width: 160px;
+        height: 100px;
+        background: var(--cake-color);
+        border: 1px solid var(--frosting);
+        opacity: 0.95;
+    }
+
+    .top {
+        position: absolute;
+        width: 160px;
+        height: 160px;
+        background: var(--frosting);
+        transform: rotateX(90deg) translateZ(80px);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 50px;
+        box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+    }
+
+    /* Knife */
+    #knife {
+        position: absolute;
+        top: -80px;
+        font-size: 50px;
+        opacity: 0;
+        transition: 0.4s;
+    }
+
+    .cake-world:hover #knife { opacity: 1; top: -50px; }
+
+    /* FADE AWAY ANIMATION */
+    .fade-away {
+        opacity: 0 !important;
+        transform: translateY(-100px) scale(0.2) rotateX(90deg) !important;
+        pointer-events: none;
+    }
+
+    /* MAIN CONTENT */
+    #main-content {
+        display: none;
+        opacity: 0;
+        width: 100%;
+        max-width: 400px;
+        transition: opacity 1.5s ease;
+    }
+
+    .name { font-size: 50px; font-weight: 800; text-shadow: 0 0 25px var(--pink); margin-bottom: 5px; }
+
+    /* IPHONE STYLE LETTER */
+    .letter {
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(10px);
+        color: #1c1c1e;
+        width: 85%;
+        margin: 20px auto;
+        padding: 20px;
+        border-radius: 24px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        cursor: pointer;
+        height: 55px;
+        overflow: hidden;
+        transition: height 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    .letter.open { height: 320px; overflow-y: auto; }
+
+    #message { font-size: 16px; line-height: 1.5; text-align: left; margin-top: 15px; font-weight: 400; }
+
+    /* BALLOONS */
+    .balloon {
+        position: absolute;
+        font-size: 30px;
+        bottom: -50px;
+        animation: floatUp 8s linear infinite;
+        z-index: 5;
+    }
+
+    @keyframes floatUp {
+        0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(-110vh) rotate(20deg); opacity: 0; }
+    }
+
+    button {
+        background: var(--pink);
+        color: white;
+        border: none;
+        padding: 14px 35px;
+        border-radius: 30px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 10px;
+        box-shadow: 0 10px 20px rgba(255, 75, 110, 0.3);
+    }
+
+    canvas { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 1; }
+</style>
+</head>
+<body>
+
+<canvas id="fireworks"></canvas>
+
+<div class="cake-world" id="cake-box" onclick="cutCake()">
+    <div id="knife">🔪</div>
+    <div class="cake-3d">
+        <div class="top">HBD PYARI 🫠</div>
+        <div class="side" style="transform: rotateY(0deg) translateZ(80px);"></div>
+        <div class="side" style="transform: rotateY(90deg) translateZ(80px);"></div>
+        <div class="side" style="transform: rotateY(180deg) translateZ(80px);"></div>
+        <div class="side" style="transform: rotateY(270deg) translateZ(80px);"></div>
+    </div>
+    <p style="margin-top: 160px; color: var(--pink); font-weight: 600; font-size: 18px;">Cake Cut Kayo Mu Thahyo Aww🎂</p>
+</div>
+
+<div id="main-content">
+    <div class="name">Happy Birthday CutiePieee🎀</div>
+    <h3 style="color: #ff8fa3; margin-top: 0;">Hi Laraib 🌸</h3>
+
+    <div class="letter" id="letter" onclick="openLetter()">
+        <h4 id="letter-title" style="margin:0;">💌 Open Message</h4>
+        <div id="message"></div>
+    </div>
+
+    <button onclick="surprise()">Special Surprise 🎆</button>
+</div>
+
+<script>
+    // CAKE CUTTING
+    function cutCake() {
+        const knife = document.getElementById('knife');
+        knife.style.opacity = "1";
+        knife.style.top = "20px";
+
+        setTimeout(() => {
+            document.getElementById('cake-box').classList.add('fade-away');
+            setTimeout(() => {
+                document.getElementById('cake-box').style.display = "none";
+                const main = document.getElementById('main-content');
+                main.style.display = "block";
+                setTimeout(() => { 
+                    main.style.opacity = "1"; 
+                    createBalloons();
+                }, 100);
+            }, 800);
+        }, 500);
+    }
+
+    // TYPING SCRIPT
+    const text = "Happy Birthday My Fav Person, My Douhieee. You are the most beautiful part of my life, I need you this much because Does the sun needs reason to rise? Does the rain need a reason to fall? Does stars needs a reason to shine? I can climb every mountain, swim every ocean just to being with you, Without you I'm nothing but whenever i'm with you it feels like i'm a king of my world that doesn't even exists in reality, it's only in my imagination. You will always have a special place in my house of memories 🌝 Most bestest person in my 👀 There is so much I wanna say but My words can't describe you.🥹 Pyaari Maan just wait payo kayan te parn gad thi wanyun half year guzri wayo baaki half rahyal aw InshaAllah Jald guzri weendo ihyo bh. Allah Pak Tawhan Khy Hamesha Pehnji Amaan Mai Rakhey Aen Hamesha Khush Raho and Zindagi je Har maur ty Kameeyaab Karey ❤️ — YOUR DEMON";
+    let index = 0;
+
+    function type() {
+        if (index < text.length) {
+            document.getElementById("message").innerHTML += text.charAt(index);
+            index++;
+            setTimeout(type, 40);
+        }
+    }
+
+    function openLetter() {
+        const l = document.getElementById('letter');
+        if(!l.classList.contains('open')) {
+            l.classList.add('open');
+            document.getElementById('letter-title').innerHTML = "📩 To My Princess:";
+            setTimeout(type, 500);
+        }
+    }
+
+    // BALLOONS GENERATOR
+    function createBalloons() {
+        const icons = ['🫠', '💖', '✨', '🌸', '🙃'];
+        setInterval(() => {
+            const b = document.createElement('div');
+            b.className = 'balloon';
+            b.innerHTML = icons[Math.floor(Math.random() * icons.length)];
+            b.style.left = Math.random() * 100 + "vw";
+            document.body.appendChild(b);
+            setTimeout(() => b.remove(), 8000);
+        }, 700);
+    }
+
+    // FIREWORKS & SURPRISE
+    function surprise() {
+        const canvas = document.getElementById("fireworks");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        for(let i=0; i<10; i++) {
+            setTimeout(() => {
+                for(let j=0; j<50; j++) {
+                    ctx.fillStyle = `hsl(${Math.random()*360}, 100%, 70%)`;
+                    ctx.beginPath();
+                    ctx.arc(Math.random()*canvas.width, Math.random()*canvas.height, 4, 0, Math.PI*2);
+                    ctx.fill();
+                }
+                setTimeout(() => ctx.clearRect(0,0,canvas.width,canvas.height), 600);
+            }, i * 300);
+        }
+        setTimeout(() => alert("HeHe...!!! Sorry Long Distance je wjah san cake kharaye na sghyas But I can wish you a very Happy Birthday My Princess 👑♥️"), 1200);
+    }
+
+    // Background Stars
+    for(let i=0; i<80; i++) {
+        let s = document.createElement("div");
+        s.style.position = "absolute";
+        s.style.width = "2px"; s.style.height = "2px";
+        s.style.background = "white";
+        s.style.left = Math.random()*100+"vw";
+        s.style.top = Math.random()*100+"vh";
+        s.style.opacity = Math.random();
+        document.body.appendChild(s);
+    }
+</script>
+
+</body>
+</html>
